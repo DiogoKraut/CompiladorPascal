@@ -1,0 +1,287 @@
+Terminals unused in grammar
+
+    ABRE_PARENTESES
+    FECHA_PARENTESES
+
+
+Grammar
+
+    0 $accept: expr $end
+
+    1 expr: add
+    2     | or
+
+    3 add: add MAIS mul
+    4    | add MENOS mul
+    5    | mul
+
+    6 mul: mul ASTERISCO fator
+    7    | mul DIV fator
+    8    | fator
+
+    9 fator: IDENT
+
+   10 or: or OR and
+   11   | and
+
+   12 and: and AND bool
+   13    | bool
+
+   14 bool: BOOL
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    IDENT (258) 9
+    BOOL (259) 14
+    MAIS (260) 3
+    MENOS (261) 4
+    OR (262) 10
+    AND (263) 12
+    ASTERISCO (264) 6
+    DIV (265) 7
+    ABRE_PARENTESES (266)
+    FECHA_PARENTESES (267)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (13)
+        on left: 0
+    expr (14)
+        on left: 1 2
+        on right: 0
+    add (15)
+        on left: 3 4 5
+        on right: 1 3 4
+    mul (16)
+        on left: 6 7 8
+        on right: 3 4 5 6 7
+    fator (17)
+        on left: 9
+        on right: 6 7 8
+    or (18)
+        on left: 10 11
+        on right: 2 10
+    and (19)
+        on left: 12 13
+        on right: 10 11 12
+    bool (20)
+        on left: 14
+        on right: 12 13
+
+
+State 0
+
+    0 $accept: • expr $end
+
+    IDENT  shift, and go to state 1
+    BOOL   shift, and go to state 2
+
+    expr   go to state 3
+    add    go to state 4
+    mul    go to state 5
+    fator  go to state 6
+    or     go to state 7
+    and    go to state 8
+    bool   go to state 9
+
+
+State 1
+
+    9 fator: IDENT •
+
+    $default  reduce using rule 9 (fator)
+
+
+State 2
+
+   14 bool: BOOL •
+
+    $default  reduce using rule 14 (bool)
+
+
+State 3
+
+    0 $accept: expr • $end
+
+    $end  shift, and go to state 10
+
+
+State 4
+
+    1 expr: add •
+    3 add: add • MAIS mul
+    4    | add • MENOS mul
+
+    MAIS   shift, and go to state 11
+    MENOS  shift, and go to state 12
+
+    $default  reduce using rule 1 (expr)
+
+
+State 5
+
+    5 add: mul •
+    6 mul: mul • ASTERISCO fator
+    7    | mul • DIV fator
+
+    ASTERISCO  shift, and go to state 13
+    DIV        shift, and go to state 14
+
+    $default  reduce using rule 5 (add)
+
+
+State 6
+
+    8 mul: fator •
+
+    $default  reduce using rule 8 (mul)
+
+
+State 7
+
+    2 expr: or •
+   10 or: or • OR and
+
+    OR  shift, and go to state 15
+
+    $default  reduce using rule 2 (expr)
+
+
+State 8
+
+   11 or: and •
+   12 and: and • AND bool
+
+    AND  shift, and go to state 16
+
+    $default  reduce using rule 11 (or)
+
+
+State 9
+
+   13 and: bool •
+
+    $default  reduce using rule 13 (and)
+
+
+State 10
+
+    0 $accept: expr $end •
+
+    $default  accept
+
+
+State 11
+
+    3 add: add MAIS • mul
+
+    IDENT  shift, and go to state 1
+
+    mul    go to state 17
+    fator  go to state 6
+
+
+State 12
+
+    4 add: add MENOS • mul
+
+    IDENT  shift, and go to state 1
+
+    mul    go to state 18
+    fator  go to state 6
+
+
+State 13
+
+    6 mul: mul ASTERISCO • fator
+
+    IDENT  shift, and go to state 1
+
+    fator  go to state 19
+
+
+State 14
+
+    7 mul: mul DIV • fator
+
+    IDENT  shift, and go to state 1
+
+    fator  go to state 20
+
+
+State 15
+
+   10 or: or OR • and
+
+    BOOL  shift, and go to state 2
+
+    and   go to state 21
+    bool  go to state 9
+
+
+State 16
+
+   12 and: and AND • bool
+
+    BOOL  shift, and go to state 2
+
+    bool  go to state 22
+
+
+State 17
+
+    3 add: add MAIS mul •
+    6 mul: mul • ASTERISCO fator
+    7    | mul • DIV fator
+
+    ASTERISCO  shift, and go to state 13
+    DIV        shift, and go to state 14
+
+    $default  reduce using rule 3 (add)
+
+
+State 18
+
+    4 add: add MENOS mul •
+    6 mul: mul • ASTERISCO fator
+    7    | mul • DIV fator
+
+    ASTERISCO  shift, and go to state 13
+    DIV        shift, and go to state 14
+
+    $default  reduce using rule 4 (add)
+
+
+State 19
+
+    6 mul: mul ASTERISCO fator •
+
+    $default  reduce using rule 6 (mul)
+
+
+State 20
+
+    7 mul: mul DIV fator •
+
+    $default  reduce using rule 7 (mul)
+
+
+State 21
+
+   10 or: or OR and •
+   12 and: and • AND bool
+
+    AND  shift, and go to state 16
+
+    $default  reduce using rule 10 (or)
+
+
+State 22
+
+   12 and: and AND bool •
+
+    $default  reduce using rule 12 (and)
