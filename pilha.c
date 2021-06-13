@@ -14,6 +14,7 @@ int init_pilha(pilha_t *p) {
 int empilha(pilha_t *p, void *elem) {
 	if(!p || !elem) return -1;
 
+
 	p->elem[p->head] = elem;
 	p->head++;
 	return 0;
@@ -27,6 +28,11 @@ int empilha_tipo(pilha_t *p, int elem) {
 	p->elem[p->head] = aux;
 	p->head++;
 	return 0;
+}
+
+void *peek(pilha_t *p) {
+	if(!p || p->head <= 0) return NULL;
+	return p->elem[p->head-1];
 }
 
 void *desempilha(pilha_t *p) {

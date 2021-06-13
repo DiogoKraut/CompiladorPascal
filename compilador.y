@@ -17,14 +17,19 @@ void yyerror (char const *);
 
 tabela_simb_t *tab_simb;
 pilha_t *pilha_tipos;
+pilha_t *pilha_rotulos;
 
 int num_vars;
 int deslocamento[MAX_NIVEL];
 int nivel;
 int var_count;
+
 char l_elem[TAM_TOKEN];
+char *rotulo;
+int rot_count;
 
 int checaTipos(int tipo);
+char *empilha_rotulo(pilha_t *p);
 
 %}
 
@@ -63,17 +68,12 @@ bloco       :
 ;
 
 
-parte_declara_vars : { var_count = 0;} VAR declara_vars
-            | 
+parte_declara_vars  : { var_count = 0;} VAR declara_vars
+                    | 
 ;
 
-/*
-var         : { var_count = 0;} VAR declara_vars
-            |
-;*/
-
-declara_vars : declara_vars declara_var 
-            | declara_var 
+declara_vars  : declara_vars declara_var 
+              | declara_var 
 ;
 
 declara_var : lista_id_var DOIS_PONTOS tipo 
@@ -94,8 +94,8 @@ tipo        : INTEGER
 lista_id_var  : lista_id_var VIRGULA IDENT 
               {
                 if(busca_tabela(tab_simb, token, nivel, NIVEL_SEARCH) != NULL) {
-                  IMPRIME("______Simbolo ja existe");
-                  exit(1);
+                    IMPRIME("______Simbolo ja existe");
+                    exit(1);
                 }
                 simb_t *simb = cria_simb(token, 0, nivel, deslocamento[nivel]);
                 insere_tabela(tab_simb, simb);
@@ -106,8 +106,8 @@ lista_id_var  : lista_id_var VIRGULA IDENT
               | IDENT 
               { 
                 if(busca_tabela(tab_simb, token, nivel, NIVEL_SEARCH) != NULL) {
-                  IMPRIME("______Simbolo ja existe");
-                  exit(1);
+                    IMPRIME("______Simbolo ja existe");
+                    exit(1);
                 }
                 simb_t *simb = cria_simb(token, 0, nivel, deslocamento[nivel]);
                 insere_tabela(tab_simb, simb);
@@ -131,6 +131,7 @@ comandos  : comandos PONTO_E_VIRGULA comando
 comando : atribuicao
         | write
         | read
+        | while
 ;
 
 write : WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES
@@ -144,8 +145,8 @@ var_write : IDENT
             {
               simb_t *simb = busca_tabela(tab_simb, token, nivel, FULL_SEARCH);
               if(simb == NULL){
-                fprintf(stderr, "Simbolo nao existe\n");
-                exit(1);
+                  fprintf(stderr, "Simbolo nao existe\n");
+                  exit(1);
               }
 
               char aux[10];
@@ -172,8 +173,8 @@ var_read  : IDENT
             {
               simb_t *simb = busca_tabela(tab_simb, token, nivel, FULL_SEARCH);
               if(simb == NULL){
-                fprintf(stderr, "Simbolo nao existe\n");
-                exit(1);
+                  fprintf(stderr, "Simbolo nao existe\n");
+                  exit(1);
               }
 
               geraCodigo(NULL, "LEIT");
@@ -190,10 +191,16 @@ atribuicao :  IDENT
               ATRIBUICAO comparacao
               { 
                 simb_t *simb = busca_tabela(tab_simb, l_elem, nivel, FULL_SEARCH);
-
-                char aux[10];
-                sprintf(aux, "ARMZ %d,%d", simb->nivel, simb->deslocamento);
-                geraCodigo(NULL, aux);
+                empilha_tipo(pilha_tipos, simb->tipo);
+                if(checaTipos(INT)) {
+                    char aux[10];
+                    sprintf(aux, "ARMZ %d,%d", simb->nivel, simb->deslocamento);
+                    geraCodigo(NULL, aux);
+                    empilha_tipo(pilha_tipos, INT);
+                } else {
+                    printf("Syntax Error : Type mismatch\n");
+                    return 1;
+                }
               }
 ;
 /*
@@ -208,6 +215,55 @@ constante : NUMERO
 
 /* Comparacao >>> +\-\or >>> *\/\and */
 comparacao  : comparacao IGUAL expr
+            {
+              if(checaTipos(INT)) {
+                  geraCodigo(NULL, "CMIG");
+                  empilha_tipo(pilha_tipos, BOOL);
+              } else {
+                  printf("Syntax Error : Type mismatch\n");
+                  return 1;
+              }
+            }
+            | comparacao MENOR expr
+            {
+              if(checaTipos(INT)) {
+                  geraCodigo(NULL, "CMME");
+                  empilha_tipo(pilha_tipos, BOOL);
+              } else {
+                  printf("Syntax Error : Type mismatch\n");
+                  return 1;
+              }
+            }
+            | comparacao MAIOR expr
+            {
+              if(checaTipos(INT)) {
+                  geraCodigo(NULL, "CMMA");
+                  empilha_tipo(pilha_tipos, BOOL);
+              } else {
+                  printf("Syntax Error : Type mismatch\n");
+                  return 1;
+              }
+            }
+            | comparacao MENOR_IGUAL expr
+            {
+              if(checaTipos(INT)) {
+                  geraCodigo(NULL, "CMEG");
+                  empilha_tipo(pilha_tipos, BOOL);
+              } else {
+                  printf("Syntax Error : Type mismatch\n");
+                  return 1;
+              }
+            }
+            | comparacao MAIOR_IGUAL expr
+            {
+              if(checaTipos(INT)) {
+                  geraCodigo(NULL, "CMMAG");
+                  empilha_tipo(pilha_tipos, BOOL);
+              } else {
+                  printf("Syntax Error : Type mismatch\n");
+                  return 1;
+              }
+            }
             | expr
 ;
 
@@ -217,8 +273,8 @@ expr : expr MAIS mult
             geraCodigo(NULL, "SOMA");
             empilha_tipo(pilha_tipos, INT);
         } else {
-          printf("Syntax Error : Type mismash\n");
-          return 1;
+            printf("Syntax Error : Type mismatch\n");
+            return 1;
         }
       }
 
@@ -227,7 +283,10 @@ expr : expr MAIS mult
         if(checaTipos(INT)) {
             geraCodigo(NULL, "SUBT");
             empilha_tipo(pilha_tipos, INT);
-          }
+        } else {
+            printf("Syntax Error : Type mismatch\n");
+            return 1;
+        }
       }
 
       | expr OR mult
@@ -235,6 +294,9 @@ expr : expr MAIS mult
         if(checaTipos(BOOL)) {
             geraCodigo(NULL, "DISJ");
             empilha_tipo(pilha_tipos, BOOL);
+        } else {
+            printf("Syntax Error : Type mismatch\n");
+            return 1;
         }
       }
 
@@ -244,25 +306,34 @@ expr : expr MAIS mult
 mult :  mult MULTIPLICACAO operando
         {
           if(checaTipos(INT)) {
-            geraCodigo(NULL, "MULT");
-            empilha_tipo(pilha_tipos, INT);
+              geraCodigo(NULL, "MULT");
+              empilha_tipo(pilha_tipos, INT);
+          } else {
+              printf("Syntax Error : Type mismatch\n");
+              return 1;
           }
         }
 
       | mult DIV operando
         {
           if(checaTipos(INT)) {
-            geraCodigo(NULL, "DIVI");
-            empilha_tipo(pilha_tipos, INT);
+              geraCodigo(NULL, "DIVI");
+              empilha_tipo(pilha_tipos, INT);
 
+          } else {
+              printf("Syntax Error : Type mismatch\n");
+              return 1;
           }
         }
 
       | mult AND operando
         {
           if(checaTipos(BOOL)) {
-            geraCodigo(NULL, "CONJ");
-            empilha_tipo(pilha_tipos, BOOL);
+              geraCodigo(NULL, "CONJ");
+              empilha_tipo(pilha_tipos, BOOL);
+          } else {
+              printf("Syntax Error : Type mismatch\n");
+              return 1;
           }
         }
 
@@ -291,12 +362,51 @@ ident : IDENT
         }
 ;
 
+while : {
+          geraCodigo(empilha_rotulo(pilha_rotulos), "NADA");
+          empilha_rotulo(pilha_rotulos);
+
+        }
+        WHILE comparacao
+        /*{
+          char aux[TAM_TOKEN*2];
+          sprintf(aux, "DSVF %s", (char *)peek(pilha_rotulos));
+          geraCodigo(NULL, aux);
+        }*/
+        DO
+        {
+          char aux[TAM_TOKEN*2];
+          sprintf(aux, "DSVF %s", (char *)peek(pilha_rotulos));
+          geraCodigo(NULL, aux);
+        }
+        comando_composto
+        {
+          char nada[5];
+          strncpy(nada, (char *)desempilha(pilha_rotulos), 5);
+
+          char rot[5];
+          strncpy(rot, (char *)desempilha(pilha_rotulos), 5);
+
+          char aux[TAM_TOKEN];
+          snprintf(aux, TAM_TOKEN, "DSVS %s", rot);
+          geraCodigo(NULL, aux);
+          geraCodigo(nada, "NADA");
+        }
+;
+
 
 %%
 void yyerror (char const *message)
 {
     fputs (message, stderr);
     fputc ('\n', stderr);
+}
+
+char *empilha_rotulo(pilha_t *p) {
+    char *rot = malloc(4);
+    snprintf(rot, 4, "R%02d", p->head);
+    empilha(p, rot);
+    return rot;
 }
 
 int checaTipos(int tipo) {
@@ -321,7 +431,7 @@ int main (int argc, char** argv) {
     extern FILE* yyin;
 
     if (argc<2 || argc>2) {
-        printf("usage compilador <arq>a %d\n", argc);
+        printf("usage compilador  <arq>a %d\n", argc);
         return(-1);
     }
 
@@ -335,9 +445,10 @@ int main (int argc, char** argv) {
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
-    num_vars = 0;
-    nivel = 0;
+    num_vars  = 0;
+    nivel     = 0;
     var_count = 0;
+    rot_count = 0;
 
     tab_simb = malloc(sizeof(tabela_simb_t));
     if(init_tabela(tab_simb)) {
@@ -347,6 +458,12 @@ int main (int argc, char** argv) {
 
     pilha_tipos = malloc(sizeof(pilha_t));
     if(init_pilha(pilha_tipos)) {
+        perror("CRIA_PILHA: ");
+        exit(1);
+    }
+
+    pilha_rotulos = malloc(sizeof(pilha_t));
+    if(init_pilha(pilha_rotulos)) {
         perror("CRIA_PILHA: ");
         exit(1);
     }

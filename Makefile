@@ -24,3 +24,4 @@ clean :
 purge:
 	rm -f compilador.tab.* lex.yy.c *.o
 	rm -f compilador
+	rm -f MEPA*

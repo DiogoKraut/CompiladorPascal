@@ -16,6 +16,9 @@ int empilha(pilha_t *p, void *elem);
 int empilha_tipo(pilha_t *p, int elem);
 
 
+void *peek(pilha_t *p);
+
+
 void *desempilha(pilha_t *p);
 
 #endif
