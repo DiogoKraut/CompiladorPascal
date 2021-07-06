@@ -30,6 +30,8 @@ int rot_count;
 
 int checaTipos(int tipo);
 char *empilha_rotulo(pilha_t *p);
+int geraCodigoExpr(int tipo_c, int tipo_e, char *instr);
+int checaTipoTopo(int tipo);
 
 %}
 
@@ -47,6 +49,10 @@ char *empilha_rotulo(pilha_t *p);
 %token MENOR MENOR_IGUAL MAIOR MAIOR_IGUAL AND
 %token READ WRITE
 %token NUMERO BOOLEAN INTEGER
+
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE
+
 %%
 
 programa    :{ 
@@ -132,6 +138,7 @@ comando : atribuicao
         | write
         | read
         | while
+        | if_completo
 ;
 
 write : WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES
@@ -191,6 +198,10 @@ atribuicao :  IDENT
               ATRIBUICAO comparacao
               { 
                 simb_t *simb = busca_tabela(tab_simb, l_elem, nivel, FULL_SEARCH);
+                if(simb == NULL) {
+                    fprintf(stderr, "Nao encontrou %s na tabela de simbolos\n", l_elem);
+                    return 1;
+                }
                 empilha_tipo(pilha_tipos, simb->tipo);
                 if(checaTipos(INT)) {
                     char aux[10];
@@ -216,128 +227,61 @@ constante : NUMERO
 /* Comparacao >>> +\-\or >>> *\/\and */
 comparacao  : comparacao IGUAL expr
             {
-              if(checaTipos(INT)) {
-                  geraCodigo(NULL, "CMIG");
-                  empilha_tipo(pilha_tipos, BOOL);
-              } else {
-                  printf("Syntax Error : Type mismatch\n");
-                  return 1;
-              }
+              if(!geraCodigoExpr(INT, BOOL, "CMIG")) return 1;
             }
             | comparacao MENOR expr
             {
-              if(checaTipos(INT)) {
-                  geraCodigo(NULL, "CMME");
-                  empilha_tipo(pilha_tipos, BOOL);
-              } else {
-                  printf("Syntax Error : Type mismatch\n");
-                  return 1;
-              }
+              if(!geraCodigoExpr(INT, BOOL, "CMME")) return 1;
             }
             | comparacao MAIOR expr
             {
-              if(checaTipos(INT)) {
-                  geraCodigo(NULL, "CMMA");
-                  empilha_tipo(pilha_tipos, BOOL);
-              } else {
-                  printf("Syntax Error : Type mismatch\n");
-                  return 1;
-              }
+              if(!geraCodigoExpr(INT, BOOL, "CMMA")) return 1;
             }
             | comparacao MENOR_IGUAL expr
             {
-              if(checaTipos(INT)) {
-                  geraCodigo(NULL, "CMEG");
-                  empilha_tipo(pilha_tipos, BOOL);
-              } else {
-                  printf("Syntax Error : Type mismatch\n");
-                  return 1;
-              }
+              if(!geraCodigoExpr(INT, BOOL, "CMEG")) return 1;
             }
             | comparacao MAIOR_IGUAL expr
             {
-              if(checaTipos(INT)) {
-                  geraCodigo(NULL, "CMMAG");
-                  empilha_tipo(pilha_tipos, BOOL);
-              } else {
-                  printf("Syntax Error : Type mismatch\n");
-                  return 1;
-              }
+              if(!geraCodigoExpr(INT, BOOL, "CMAG")) return 1;
             }
             | expr
 ;
 
-expr : expr MAIS mult
-      {
-        if(checaTipos(INT)) {
-            geraCodigo(NULL, "SOMA");
-            empilha_tipo(pilha_tipos, INT);
-        } else {
-            printf("Syntax Error : Type mismatch\n");
-            return 1;
-        }
-      }
+expr :        expr MAIS mult
+            {
+              if(!geraCodigoExpr(INT, INT, "SOMA")) return 1;
+            }
 
-      | expr MENOS mult
-      {
-        if(checaTipos(INT)) {
-            geraCodigo(NULL, "SUBT");
-            empilha_tipo(pilha_tipos, INT);
-        } else {
-            printf("Syntax Error : Type mismatch\n");
-            return 1;
-        }
-      }
+            | expr MENOS mult
+            {
+              if(!geraCodigoExpr(INT, INT, "SUBT")) return 1;
+            }
 
-      | expr OR mult
-      {
-        if(checaTipos(BOOL)) {
-            geraCodigo(NULL, "DISJ");
-            empilha_tipo(pilha_tipos, BOOL);
-        } else {
-            printf("Syntax Error : Type mismatch\n");
-            return 1;
-        }
-      }
+            | expr OR mult
+            {
+              if(!geraCodigoExpr(BOOL, BOOL, "DISJ")) return 1;
+            }
 
-      | mult
+            | mult
 ;
 
-mult :  mult MULTIPLICACAO operando
-        {
-          if(checaTipos(INT)) {
-              geraCodigo(NULL, "MULT");
-              empilha_tipo(pilha_tipos, INT);
-          } else {
-              printf("Syntax Error : Type mismatch\n");
-              return 1;
-          }
-        }
+mult :        mult MULTIPLICACAO operando
+              {
+                if(!geraCodigoExpr(INT, INT, "MULT")) return 1;
+              }
 
-      | mult DIV operando
-        {
-          if(checaTipos(INT)) {
-              geraCodigo(NULL, "DIVI");
-              empilha_tipo(pilha_tipos, INT);
+            | mult DIV operando
+              {
+                if(!geraCodigoExpr(INT, INT, "DIVI")) return 1;
+              }
 
-          } else {
-              printf("Syntax Error : Type mismatch\n");
-              return 1;
-          }
-        }
+            | mult AND operando
+              {
+                if(!geraCodigoExpr(BOOL, BOOL, "CONJ")) return 1;
+              }
 
-      | mult AND operando
-        {
-          if(checaTipos(BOOL)) {
-              geraCodigo(NULL, "CONJ");
-              empilha_tipo(pilha_tipos, BOOL);
-          } else {
-              printf("Syntax Error : Type mismatch\n");
-              return 1;
-          }
-        }
-
-      | operando
+            | operando
 ;
 operando :  ABRE_PARENTESES comparacao FECHA_PARENTESES
           | ident
@@ -360,6 +304,40 @@ ident : IDENT
           geraCodigo(NULL, aux);
 
         }
+;
+
+if_comp : ABRE_PARENTESES comparacao FECHA_PARENTESES
+;
+
+if_completo : IF
+              {
+                empilha_rotulo(pilha_rotulos);
+                empilha_rotulo(pilha_rotulos);
+              } 
+              if_comp
+              {
+                checaTipoTopo(BOOL);
+                char aux[TAM_TOKEN*2];
+                sprintf(aux, "DSVF %s", (char *)pilha_rotulos->elem[pilha_rotulos->head-2]);
+                geraCodigo(NULL, aux);
+              }
+              THEN comando
+              {
+                char aux[TAM_TOKEN*2];
+                sprintf(aux, "DSVS %s", (char *)peek(pilha_rotulos));
+                geraCodigo(NULL, aux);
+                geraCodigo((char *)pilha_rotulos->elem[pilha_rotulos->head-2], "NADA");
+              }
+              if_else
+              {
+                geraCodigo((char *)peek(pilha_rotulos), "NADA");
+                desempilha(pilha_rotulos);
+                desempilha(pilha_rotulos);
+              }
+;
+
+if_else : ELSE comando
+        | %prec LOWER_THAN_ELSE
 ;
 
 while : {
@@ -402,13 +380,30 @@ void yyerror (char const *message)
     fputc ('\n', stderr);
 }
 
+int geraCodigoExpr(int tipo_c, int tipo_e, char *instr) {
+    if(checaTipos(tipo_c)) {
+        geraCodigo(NULL, instr);
+        empilha_tipo(pilha_tipos, tipo_e);
+        return 1;
+    } else {
+        printf("Syntax Error : Type mismatch\n");
+        return 0;
+    }
+}
+
 char *empilha_rotulo(pilha_t *p) {
     char *rot = malloc(4);
     snprintf(rot, 4, "R%02d", p->head);
     empilha(p, rot);
     return rot;
 }
-
+int checaTipoTopo(int tipo) {
+    int *a = desempilha(pilha_tipos);
+    if(*a == tipo) {
+        free(a);
+        return 0;
+    }
+}
 int checaTipos(int tipo) {
     int *a, *b;
 
