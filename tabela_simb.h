@@ -8,6 +8,12 @@
 #define FULL_SEARCH 1
 #define NIVEL_SEARCH 0
 
+#define VAR_SIMPLES 0
+#define PARAM_FORM 1
+#define PROCED 2
+#define ROT 3
+
+
 typedef struct simb_t {
     struct simb_t *prox;
     char id[TAM_TOKEN];
@@ -15,6 +21,7 @@ typedef struct simb_t {
     int nivel;
     int deslocamento;
     int tipo;
+    char rot[4];
 } simb_t;
 
 typedef struct tabela_simb_t {

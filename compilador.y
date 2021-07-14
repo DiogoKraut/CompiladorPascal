@@ -23,6 +23,8 @@ int num_vars;
 int deslocamento[MAX_NIVEL];
 int nivel;
 int var_count;
+int proc_count;
+int prox_rot;
 
 char l_elem[TAM_TOKEN];
 char *rotulo;
@@ -68,11 +70,75 @@ programa    :{
              }
 ;
 
-bloco       : 
-              parte_declara_vars
+bloco       : parte_declara_vars
+              { /* gera DSVS para main */
+                if(nivel == 0){
+                    empilha_rotulo(pilha_rotulos);
+                    char aux[TAM_TOKEN*2];
+                    sprintf(aux, "DSVS %s", (char *)peek(pilha_rotulos));
+                    geraCodigo(NULL, aux);
+                }
+              }
+              declara_proceds_funcs
+              {
+                if(nivel <= 0) {
+                    geraCodigo((char *)peek(pilha_rotulos), "NADA");
+                }
+              }
               comando_composto
+              {
+                /* remove variaveis do nivel lexico atual */
+                int i = deslocamento[nivel];
+                /* DMEM */
+                char aux[10];
+                sprintf(aux, "DMEM %d", deslocamento[nivel]);
+                geraCodigo(NULL, aux);
+
+                if(nivel > 0) {
+                    char aux[TAM_TOKEN*2];
+                    sprintf(aux, "RTPR %d,%d", nivel, deslocamento[nivel]);
+                    desempilha(pilha_rotulos);
+                    geraCodigo(NULL, aux);
+                }
+
+                deslocamento[nivel] -= i;
+
+                if(nivel <= 0) i += proc_count;
+
+                for(i = i; i > 0; i--) {
+                    remove_tabela(tab_simb);
+                    //imprime_tabela(tab_simb);
+                }
+                nivel--;
+                //remove_tabela(tab_simb);
+              }
 ;
 
+declara_proceds_funcs : declara_proceds_funcs declara_proced_func
+                      |
+;
+
+declara_proced_func : PROCEDURE IDENT
+                    {
+                      proc_count++;
+                      nivel++; // incrementa nivel
+
+                      /* gera rotulo ENPR */
+                      empilha_rotulo(pilha_rotulos);
+                      char aux[TAM_TOKEN*2];
+                      sprintf(aux, "ENPR %d", nivel);
+                      geraCodigo((char *)peek(pilha_rotulos), aux);
+                      /* inserir tabela simb */
+                      if(busca_tabela(tab_simb, token, nivel, NIVEL_SEARCH) != NULL) {
+                          IMPRIME("______Simbolo ja existe");
+                          exit(1);
+                      }
+                      simb_t *simb = cria_simb(token, PROCED, nivel, deslocamento[nivel]);
+                      strncpy(simb->rot, (char*)peek(pilha_rotulos), 4);
+                      insere_tabela(tab_simb, simb);
+
+                    } PONTO_E_VIRGULA bloco
+;
 
 parte_declara_vars  : { var_count = 0;} VAR declara_vars
                     | 
@@ -103,8 +169,9 @@ lista_id_var  : lista_id_var VIRGULA IDENT
                     IMPRIME("______Simbolo ja existe");
                     exit(1);
                 }
-                simb_t *simb = cria_simb(token, 0, nivel, deslocamento[nivel]);
+                simb_t *simb = cria_simb(token, VAR_SIMPLES, nivel, deslocamento[nivel]);
                 insere_tabela(tab_simb, simb);
+                //imprime_tabela(tab_simb);
 
                 var_count++;
                 deslocamento[nivel]++;                
@@ -115,8 +182,9 @@ lista_id_var  : lista_id_var VIRGULA IDENT
                     IMPRIME("______Simbolo ja existe");
                     exit(1);
                 }
-                simb_t *simb = cria_simb(token, 0, nivel, deslocamento[nivel]);
+                simb_t *simb = cria_simb(token, VAR_SIMPLES, nivel, deslocamento[nivel]);
                 insere_tabela(tab_simb, simb);
+                //imprime_tabela(tab_simb);
 
                 var_count++;
                 deslocamento[nivel]++;     
@@ -134,7 +202,7 @@ comandos  : comandos PONTO_E_VIRGULA comando
           | comando
 ;
 
-comando : atribuicao
+comando : parte_atribuicao_chamada_proc
         | write
         | read
         | while
@@ -191,11 +259,27 @@ var_read  : IDENT
             }
 ;
 
-atribuicao :  IDENT 
+parte_atribuicao_chamada_proc : IDENT 
               {
                 strncpy(l_elem, token, TAM_TOKEN);
-              }
-              ATRIBUICAO comparacao
+              } atribuicao_chamada_proc
+;
+atribuicao_chamada_proc : atribuicao
+                        | chamada_proc
+;
+
+chamada_proc  : {
+                  simb_t *simb = busca_tabela(tab_simb, l_elem, nivel+1, FULL_SEARCH);
+                  if(simb == NULL){
+                      fprintf(stderr, "Simbolo nao existe, %s\n", l_elem);
+                      exit(1);
+                  }
+                  char aux[12];
+                  sprintf(aux, "CHPR %s,%d", simb->rot, nivel);
+                  geraCodigo(NULL, aux);
+                }
+;
+atribuicao :  ATRIBUICAO comparacao
               { 
                 simb_t *simb = busca_tabela(tab_simb, l_elem, nivel, FULL_SEARCH);
                 if(simb == NULL) {
@@ -306,8 +390,6 @@ ident : IDENT
         }
 ;
 
-if_comp : ABRE_PARENTESES comparacao FECHA_PARENTESES
-;
 
 if_completo : IF
               {
@@ -334,6 +416,9 @@ if_completo : IF
                 desempilha(pilha_rotulos);
                 desempilha(pilha_rotulos);
               }
+;
+
+if_comp : ABRE_PARENTESES comparacao FECHA_PARENTESES
 ;
 
 if_else : ELSE comando
@@ -393,7 +478,7 @@ int geraCodigoExpr(int tipo_c, int tipo_e, char *instr) {
 
 char *empilha_rotulo(pilha_t *p) {
     char *rot = malloc(4);
-    snprintf(rot, 4, "R%02d", p->head);
+    snprintf(rot, 4, "R%02d", prox_rot++);
     empilha(p, rot);
     return rot;
 }
@@ -440,10 +525,12 @@ int main (int argc, char** argv) {
 /* -------------------------------------------------------------------
  *  Inicia a Tabela de Símbolos
  * ------------------------------------------------------------------- */
-    num_vars  = 0;
-    nivel     = 0;
-    var_count = 0;
-    rot_count = 0;
+    nivel      = 0;
+    num_vars   = 0;
+    prox_rot   = 0;
+    var_count  = 0;
+    rot_count  = 0;
+    proc_count = 0;
 
     tab_simb = malloc(sizeof(tabela_simb_t));
     if(init_tabela(tab_simb)) {

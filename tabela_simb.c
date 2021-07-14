@@ -5,6 +5,8 @@
 
 #include "tabela_simb.h"
 
+
+
 int init_tabela(tabela_simb_t *t) {
     
     if(!t) return -1;
@@ -22,10 +24,10 @@ simb_t *cria_simb(char id[TAM_TOKEN], int cat, int nivel, int desl) {
     }
     s->prox = NULL;
     strncpy(s->id, id, TAM_TOKEN);
-    s->categoria = cat;
     s->nivel = nivel;
     s->deslocamento = desl;
     s->tipo = -1;
+    s->categoria = cat;
 
     return s;
 }
