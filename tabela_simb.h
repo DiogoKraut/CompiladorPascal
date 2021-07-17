@@ -8,6 +8,9 @@
 #define FULL_SEARCH 1
 #define NIVEL_SEARCH 0
 
+#define REFERENCIA 0
+#define VALOR 1
+
 #define VAR_SIMPLES 0
 #define PARAM_FORM 1
 #define PROCED 2
@@ -17,6 +20,7 @@
 typedef struct simb_t {
     struct simb_t *prox;
     char id[TAM_TOKEN];
+    int passagem_tipo;
     int categoria;
     int nivel;
     int deslocamento;
@@ -51,5 +55,7 @@ void tipo_tabela(tabela_simb_t *t, char tipo[TAM_TOKEN], int count);
 
 
 void imprime_tabela(tabela_simb_t *t);
+
+void ajustaDeslocamentoParams(tabela_simb_t *t, int count);
 
 #endif

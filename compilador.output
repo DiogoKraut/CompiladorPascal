@@ -11,6 +11,10 @@ Terminals unused in grammar
     BOOLEAN
 
 
+State 50 conflicts: 1 shift/reduce, 1 reduce/reduce
+State 62 conflicts: 1 shift/reduce, 1 reduce/reduce
+
+
 Grammar
 
     0 $accept: programa $end
@@ -30,106 +34,124 @@ Grammar
 
     8 $@4: %empty
 
-    9 declara_proced_func: PROCEDURE IDENT $@4 PONTO_E_VIRGULA bloco
+    9 declara_proced_func: PROCEDURE IDENT $@4 parte_parametros PONTO_E_VIRGULA bloco
 
    10 $@5: %empty
 
-   11 parte_declara_vars: $@5 VAR declara_vars
-   12                   | %empty
+   11 parte_parametros: ABRE_PARENTESES parametros $@5 FECHA_PARENTESES
+   12                 | %empty
 
-   13 declara_vars: declara_vars declara_var
-   14             | declara_var
+   13 $@6: %empty
 
-   15 $@6: %empty
+   14 parametros: $@6 parametros PONTO_E_VIRGULA parametro
+   15           | parametro
 
-   16 declara_var: lista_id_var DOIS_PONTOS tipo $@6 PONTO_E_VIRGULA
+   16 parametro: passagem parametro_tipo DOIS_PONTOS tipo
 
-   17 tipo: INTEGER
+   17 passagem: VAR
+   18         | %empty
 
-   18 lista_id_var: lista_id_var VIRGULA IDENT
-   19             | IDENT
+   19 parametro_tipo: parametro_tipo VIRGULA IDENT
+   20               | IDENT
 
-   20 lista_idents: lista_idents VIRGULA IDENT
-   21             | IDENT
+   21 $@7: %empty
 
-   22 comando_composto: T_BEGIN comandos T_END
+   22 parte_declara_vars: $@7 VAR declara_vars
+   23                   | %empty
 
-   23 comandos: comandos PONTO_E_VIRGULA comando
-   24         | comando
+   24 declara_vars: declara_vars declara_var
+   25             | declara_var
 
-   25 comando: parte_atribuicao_chamada_proc
-   26        | write
-   27        | read
-   28        | while
-   29        | if_completo
+   26 $@8: %empty
 
-   30 write: WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES
+   27 declara_var: lista_id_var DOIS_PONTOS tipo $@8 PONTO_E_VIRGULA
 
-   31 vars_write: vars_write VIRGULA var_write
-   32           | var_write
+   28 tipo: INTEGER
 
-   33 var_write: IDENT
-   34          | NUMERO
+   29 lista_id_var: lista_id_var VIRGULA IDENT
+   30             | IDENT
 
-   35 read: READ ABRE_PARENTESES vars_read FECHA_PARENTESES
+   31 lista_idents: lista_idents VIRGULA IDENT
+   32             | IDENT
 
-   36 vars_read: vars_read VIRGULA var_read
-   37          | var_read
+   33 comando_composto: T_BEGIN comandos T_END
 
-   38 var_read: IDENT
+   34 comandos: comandos PONTO_E_VIRGULA comando
+   35         | comando
 
-   39 $@7: %empty
+   36 comando: parte_atribuicao_chamada_proc
+   37        | write
+   38        | read
+   39        | while
+   40        | if_completo
 
-   40 parte_atribuicao_chamada_proc: IDENT $@7 atribuicao_chamada_proc
+   41 write: WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES
 
-   41 atribuicao_chamada_proc: atribuicao
-   42                        | chamada_proc
+   42 vars_write: vars_write VIRGULA var_write
+   43           | var_write
 
-   43 chamada_proc: %empty
+   44 var_write: IDENT
+   45          | NUMERO
 
-   44 atribuicao: ATRIBUICAO comparacao
+   46 read: READ ABRE_PARENTESES vars_read FECHA_PARENTESES
 
-   45 comparacao: comparacao IGUAL expr
-   46           | comparacao MENOR expr
-   47           | comparacao MAIOR expr
-   48           | comparacao MENOR_IGUAL expr
-   49           | comparacao MAIOR_IGUAL expr
-   50           | expr
+   47 vars_read: vars_read VIRGULA var_read
+   48          | var_read
 
-   51 expr: expr MAIS mult
-   52     | expr MENOS mult
-   53     | expr OR mult
-   54     | mult
+   49 var_read: IDENT
 
-   55 mult: mult MULTIPLICACAO operando
-   56     | mult DIV operando
-   57     | mult AND operando
-   58     | operando
+   50 $@9: %empty
 
-   59 operando: ABRE_PARENTESES comparacao FECHA_PARENTESES
-   60         | ident
-   61         | NUMERO
+   51 parte_atribuicao_chamada_proc: IDENT $@9 atribuicao_chamada_proc
 
-   62 ident: IDENT
+   52 atribuicao_chamada_proc: atribuicao
+   53                        | chamada_proc
 
-   63 $@8: %empty
+   54 chamada_proc: %empty
 
-   64 $@9: %empty
+   55 atribuicao: ATRIBUICAO comparacao
 
-   65 $@10: %empty
+   56 comparacao: comparacao IGUAL expr
+   57           | comparacao MENOR expr
+   58           | comparacao MAIOR expr
+   59           | comparacao MENOR_IGUAL expr
+   60           | comparacao MAIOR_IGUAL expr
+   61           | expr
 
-   66 if_completo: IF $@8 if_comp $@9 THEN comando $@10 if_else
+   62 expr: expr MAIS mult
+   63     | expr MENOS mult
+   64     | expr OR mult
+   65     | mult
 
-   67 if_comp: ABRE_PARENTESES comparacao FECHA_PARENTESES
+   66 mult: mult MULTIPLICACAO operando
+   67     | mult DIV operando
+   68     | mult AND operando
+   69     | operando
 
-   68 if_else: ELSE comando
-   69        | %empty
+   70 operando: ABRE_PARENTESES comparacao FECHA_PARENTESES
+   71         | ident
+   72         | NUMERO
 
-   70 $@11: %empty
+   73 ident: IDENT
 
-   71 $@12: %empty
+   74 $@10: %empty
 
-   72 while: $@11 WHILE comparacao DO $@12 comando_composto
+   75 $@11: %empty
+
+   76 $@12: %empty
+
+   77 if_completo: IF $@10 if_comp $@11 THEN comando $@12 if_else
+
+   78 if_comp: ABRE_PARENTESES comparacao FECHA_PARENTESES
+
+   79 if_else: ELSE comando
+   80        | %empty
+
+   81 $@13: %empty
+
+   82 $@14: %empty
+
+   83 while: $@13 WHILE comparacao DO $@14 comando_composto
 
 
 Terminals, with rules where they appear
@@ -137,47 +159,47 @@ Terminals, with rules where they appear
     $end (0) 0
     error (256)
     PROGRAM (258) 2
-    ABRE_PARENTESES (259) 2 30 35 59 67
-    FECHA_PARENTESES (260) 2 30 35 59 67
-    VIRGULA (261) 18 20 31 36
-    PONTO_E_VIRGULA (262) 2 9 16 23
-    DOIS_PONTOS (263) 16
+    ABRE_PARENTESES (259) 2 11 41 46 70 78
+    FECHA_PARENTESES (260) 2 11 41 46 70 78
+    VIRGULA (261) 19 29 31 42 47
+    PONTO_E_VIRGULA (262) 2 9 14 27 34
+    DOIS_PONTOS (263) 16 27
     PONTO (264) 2
-    T_BEGIN (265) 22
-    T_END (266) 22
-    VAR (267) 11
-    IDENT (268) 2 9 18 19 20 21 33 38 40 62
-    ATRIBUICAO (269) 44
+    T_BEGIN (265) 33
+    T_END (266) 33
+    VAR (267) 17 22
+    IDENT (268) 2 9 19 20 29 30 31 32 44 49 51 73
+    ATRIBUICAO (269) 55
     LABEL (270)
     TYPE (271)
     ARRAY (272)
     OF (273)
     PROCEDURE (274) 9
     FUNCTION (275)
-    IF (276) 66
-    ELSE (277) 68
-    THEN (278) 66
-    WHILE (279) 72
-    DO (280) 72
-    OR (281) 53
-    DIV (282) 56
+    IF (276) 77
+    ELSE (277) 79
+    THEN (278) 77
+    WHILE (279) 83
+    DO (280) 83
+    OR (281) 64
+    DIV (282) 67
     NOT (283)
-    MAIS (284) 51
-    MENOS (285) 52
-    MULTIPLICACAO (286) 55
+    MAIS (284) 62
+    MENOS (285) 63
+    MULTIPLICACAO (286) 66
     DIVISAO (287)
-    IGUAL (288) 45
+    IGUAL (288) 56
     DESIGUAL (289)
-    MENOR (290) 46
-    MENOR_IGUAL (291) 48
-    MAIOR (292) 47
-    MAIOR_IGUAL (293) 49
-    AND (294) 57
-    READ (295) 35
-    WRITE (296) 30
-    NUMERO (297) 34 61
+    MENOR (290) 57
+    MENOR_IGUAL (291) 59
+    MAIOR (292) 58
+    MAIOR_IGUAL (293) 60
+    AND (294) 68
+    READ (295) 46
+    WRITE (296) 41
+    NUMERO (297) 45 72
     BOOLEAN (298)
-    INTEGER (299) 17
+    INTEGER (299) 28
     LOWER_THAN_ELSE (300)
 
 
@@ -209,114 +231,135 @@ Nonterminals, with rules where they appear
     $@4 (54)
         on left: 8
         on right: 9
-    parte_declara_vars (55)
+    parte_parametros (55)
         on left: 11 12
-        on right: 5
+        on right: 9
     $@5 (56)
         on left: 10
         on right: 11
-    declara_vars (57)
-        on left: 13 14
-        on right: 11 13
-    declara_var (58)
+    parametros (57)
+        on left: 14 15
+        on right: 11 14
+    $@6 (58)
+        on left: 13
+        on right: 14
+    parametro (59)
         on left: 16
-        on right: 13 14
-    $@6 (59)
-        on left: 15
+        on right: 14 15
+    passagem (60)
+        on left: 17 18
         on right: 16
-    tipo (60)
-        on left: 17
-        on right: 16
-    lista_id_var (61)
-        on left: 18 19
-        on right: 16 18
-    lista_idents (62)
-        on left: 20 21
-        on right: 2 20
-    comando_composto (63)
-        on left: 22
-        on right: 5 72
-    comandos (64)
-        on left: 23 24
-        on right: 22 23
-    comando (65)
-        on left: 25 26 27 28 29
-        on right: 23 24 66 68
-    write (66)
-        on left: 30
-        on right: 26
-    vars_write (67)
-        on left: 31 32
-        on right: 30 31
-    var_write (68)
-        on left: 33 34
-        on right: 31 32
-    read (69)
-        on left: 35
+    parametro_tipo (61)
+        on left: 19 20
+        on right: 16 19
+    parte_declara_vars (62)
+        on left: 22 23
+        on right: 5
+    $@7 (63)
+        on left: 21
+        on right: 22
+    declara_vars (64)
+        on left: 24 25
+        on right: 22 24
+    declara_var (65)
+        on left: 27
+        on right: 24 25
+    $@8 (66)
+        on left: 26
         on right: 27
-    vars_read (70)
-        on left: 36 37
-        on right: 35 36
-    var_read (71)
-        on left: 38
-        on right: 36 37
-    parte_atribuicao_chamada_proc (72)
-        on left: 40
-        on right: 25
-    $@7 (73)
-        on left: 39
+    tipo (67)
+        on left: 28
+        on right: 16 27
+    lista_id_var (68)
+        on left: 29 30
+        on right: 27 29
+    lista_idents (69)
+        on left: 31 32
+        on right: 2 31
+    comando_composto (70)
+        on left: 33
+        on right: 5 83
+    comandos (71)
+        on left: 34 35
+        on right: 33 34
+    comando (72)
+        on left: 36 37 38 39 40
+        on right: 34 35 77 79
+    write (73)
+        on left: 41
+        on right: 37
+    vars_write (74)
+        on left: 42 43
+        on right: 41 42
+    var_write (75)
+        on left: 44 45
+        on right: 42 43
+    read (76)
+        on left: 46
+        on right: 38
+    vars_read (77)
+        on left: 47 48
+        on right: 46 47
+    var_read (78)
+        on left: 49
+        on right: 47 48
+    parte_atribuicao_chamada_proc (79)
+        on left: 51
+        on right: 36
+    $@9 (80)
+        on left: 50
+        on right: 51
+    atribuicao_chamada_proc (81)
+        on left: 52 53
+        on right: 51
+    chamada_proc (82)
+        on left: 54
+        on right: 53
+    atribuicao (83)
+        on left: 55
+        on right: 52
+    comparacao (84)
+        on left: 56 57 58 59 60 61
+        on right: 55 56 57 58 59 60 70 78 83
+    expr (85)
+        on left: 62 63 64 65
+        on right: 56 57 58 59 60 61 62 63 64
+    mult (86)
+        on left: 66 67 68 69
+        on right: 62 63 64 65 66 67 68
+    operando (87)
+        on left: 70 71 72
+        on right: 66 67 68 69
+    ident (88)
+        on left: 73
+        on right: 71
+    if_completo (89)
+        on left: 77
         on right: 40
-    atribuicao_chamada_proc (74)
-        on left: 41 42
-        on right: 40
-    chamada_proc (75)
-        on left: 43
-        on right: 42
-    atribuicao (76)
-        on left: 44
-        on right: 41
-    comparacao (77)
-        on left: 45 46 47 48 49 50
-        on right: 44 45 46 47 48 49 59 67 72
-    expr (78)
-        on left: 51 52 53 54
-        on right: 45 46 47 48 49 50 51 52 53
-    mult (79)
-        on left: 55 56 57 58
-        on right: 51 52 53 54 55 56 57
-    operando (80)
-        on left: 59 60 61
-        on right: 55 56 57 58
-    ident (81)
-        on left: 62
-        on right: 60
-    if_completo (82)
-        on left: 66
-        on right: 29
-    $@8 (83)
-        on left: 63
-        on right: 66
-    $@9 (84)
-        on left: 64
-        on right: 66
-    $@10 (85)
-        on left: 65
-        on right: 66
-    if_comp (86)
-        on left: 67
-        on right: 66
-    if_else (87)
-        on left: 68 69
-        on right: 66
-    while (88)
-        on left: 72
-        on right: 28
-    $@11 (89)
-        on left: 70
-        on right: 72
-    $@12 (90)
-        on left: 71
-        on right: 72
+    $@10 (90)
+        on left: 74
+        on right: 77
+    $@11 (91)
+        on left: 75
+        on right: 77
+    $@12 (92)
+        on left: 76
+        on right: 77
+    if_comp (93)
+        on left: 78
+        on right: 77
+    if_else (94)
+        on left: 79 80
+        on right: 77
+    while (95)
+        on left: 83
+        on right: 39
+    $@13 (96)
+        on left: 81
+        on right: 83
+    $@14 (97)
+        on left: 82
+        on right: 83
 
 
 State 0
@@ -375,15 +418,15 @@ State 6
 
 State 7
 
-   21 lista_idents: IDENT •
+   32 lista_idents: IDENT •
 
-    $default  reduce using rule 21 (lista_idents)
+    $default  reduce using rule 32 (lista_idents)
 
 
 State 8
 
     2 programa: $@1 PROGRAM IDENT ABRE_PARENTESES lista_idents • FECHA_PARENTESES PONTO_E_VIRGULA bloco PONTO
-   20 lista_idents: lista_idents • VIRGULA IDENT
+   31 lista_idents: lista_idents • VIRGULA IDENT
 
     FECHA_PARENTESES  shift, and go to state 9
     VIRGULA           shift, and go to state 10
@@ -398,7 +441,7 @@ State 9
 
 State 10
 
-   20 lista_idents: lista_idents VIRGULA • IDENT
+   31 lista_idents: lista_idents VIRGULA • IDENT
 
     IDENT  shift, and go to state 12
 
@@ -407,19 +450,19 @@ State 11
 
     2 programa: $@1 PROGRAM IDENT ABRE_PARENTESES lista_idents FECHA_PARENTESES PONTO_E_VIRGULA • bloco PONTO
 
-    VAR       reduce using rule 10 ($@5)
-    $default  reduce using rule 12 (parte_declara_vars)
+    VAR       reduce using rule 21 ($@7)
+    $default  reduce using rule 23 (parte_declara_vars)
 
     bloco               go to state 13
     parte_declara_vars  go to state 14
-    $@5                 go to state 15
+    $@7                 go to state 15
 
 
 State 12
 
-   20 lista_idents: lista_idents VIRGULA IDENT •
+   31 lista_idents: lista_idents VIRGULA IDENT •
 
-    $default  reduce using rule 20 (lista_idents)
+    $default  reduce using rule 31 (lista_idents)
 
 
 State 13
@@ -440,7 +483,7 @@ State 14
 
 State 15
 
-   11 parte_declara_vars: $@5 • VAR declara_vars
+   22 parte_declara_vars: $@7 • VAR declara_vars
 
     VAR  shift, and go to state 18
 
@@ -463,7 +506,7 @@ State 17
 
 State 18
 
-   11 parte_declara_vars: $@5 VAR • declara_vars
+   22 parte_declara_vars: $@7 VAR • declara_vars
 
     IDENT  shift, and go to state 20
 
@@ -487,19 +530,19 @@ State 19
 
 State 20
 
-   19 lista_id_var: IDENT •
+   30 lista_id_var: IDENT •
 
-    $default  reduce using rule 19 (lista_id_var)
+    $default  reduce using rule 30 (lista_id_var)
 
 
 State 21
 
-   11 parte_declara_vars: $@5 VAR declara_vars •
-   13 declara_vars: declara_vars • declara_var
+   22 parte_declara_vars: $@7 VAR declara_vars •
+   24 declara_vars: declara_vars • declara_var
 
     IDENT  shift, and go to state 20
 
-    $default  reduce using rule 11 (parte_declara_vars)
+    $default  reduce using rule 22 (parte_declara_vars)
 
     declara_var   go to state 27
     lista_id_var  go to state 23
@@ -507,15 +550,15 @@ State 21
 
 State 22
 
-   14 declara_vars: declara_var •
+   25 declara_vars: declara_var •
 
-    $default  reduce using rule 14 (declara_vars)
+    $default  reduce using rule 25 (declara_vars)
 
 
 State 23
 
-   16 declara_var: lista_id_var • DOIS_PONTOS tipo $@6 PONTO_E_VIRGULA
-   18 lista_id_var: lista_id_var • VIRGULA IDENT
+   27 declara_var: lista_id_var • DOIS_PONTOS tipo $@8 PONTO_E_VIRGULA
+   29 lista_id_var: lista_id_var • VIRGULA IDENT
 
     VIRGULA      shift, and go to state 28
     DOIS_PONTOS  shift, and go to state 29
@@ -523,7 +566,7 @@ State 23
 
 State 24
 
-    9 declara_proced_func: PROCEDURE • IDENT $@4 PONTO_E_VIRGULA bloco
+    9 declara_proced_func: PROCEDURE • IDENT $@4 parte_parametros PONTO_E_VIRGULA bloco
 
     IDENT  shift, and go to state 30
 
@@ -546,21 +589,21 @@ State 26
 
 State 27
 
-   13 declara_vars: declara_vars declara_var •
+   24 declara_vars: declara_vars declara_var •
 
-    $default  reduce using rule 13 (declara_vars)
+    $default  reduce using rule 24 (declara_vars)
 
 
 State 28
 
-   18 lista_id_var: lista_id_var VIRGULA • IDENT
+   29 lista_id_var: lista_id_var VIRGULA • IDENT
 
     IDENT  shift, and go to state 33
 
 
 State 29
 
-   16 declara_var: lista_id_var DOIS_PONTOS • tipo $@6 PONTO_E_VIRGULA
+   27 declara_var: lista_id_var DOIS_PONTOS • tipo $@8 PONTO_E_VIRGULA
 
     INTEGER  shift, and go to state 34
 
@@ -569,7 +612,7 @@ State 29
 
 State 30
 
-    9 declara_proced_func: PROCEDURE IDENT • $@4 PONTO_E_VIRGULA bloco
+    9 declara_proced_func: PROCEDURE IDENT • $@4 parte_parametros PONTO_E_VIRGULA bloco
 
     $default  reduce using rule 8 ($@4)
 
@@ -578,14 +621,14 @@ State 30
 
 State 31
 
-   22 comando_composto: T_BEGIN • comandos T_END
+   33 comando_composto: T_BEGIN • comandos T_END
 
     IDENT  shift, and go to state 37
     IF     shift, and go to state 38
     READ   shift, and go to state 39
     WRITE  shift, and go to state 40
 
-    $default  reduce using rule 70 ($@11)
+    $default  reduce using rule 81 ($@13)
 
     comandos                       go to state 41
     comando                        go to state 42
@@ -594,7 +637,7 @@ State 31
     parte_atribuicao_chamada_proc  go to state 45
     if_completo                    go to state 46
     while                          go to state 47
-    $@11                           go to state 48
+    $@13                           go to state 48
 
 
 State 32
@@ -606,942 +649,1105 @@ State 32
 
 State 33
 
-   18 lista_id_var: lista_id_var VIRGULA IDENT •
+   29 lista_id_var: lista_id_var VIRGULA IDENT •
 
-    $default  reduce using rule 18 (lista_id_var)
+    $default  reduce using rule 29 (lista_id_var)
 
 
 State 34
 
-   17 tipo: INTEGER •
+   28 tipo: INTEGER •
 
-    $default  reduce using rule 17 (tipo)
+    $default  reduce using rule 28 (tipo)
 
 
 State 35
 
-   16 declara_var: lista_id_var DOIS_PONTOS tipo • $@6 PONTO_E_VIRGULA
+   27 declara_var: lista_id_var DOIS_PONTOS tipo • $@8 PONTO_E_VIRGULA
 
-    $default  reduce using rule 15 ($@6)
+    $default  reduce using rule 26 ($@8)
 
-    $@6  go to state 49
+    $@8  go to state 49
 
 
 State 36
 
-    9 declara_proced_func: PROCEDURE IDENT $@4 • PONTO_E_VIRGULA bloco
+    9 declara_proced_func: PROCEDURE IDENT $@4 • parte_parametros PONTO_E_VIRGULA bloco
 
-    PONTO_E_VIRGULA  shift, and go to state 50
+    ABRE_PARENTESES  shift, and go to state 50
+
+    $default  reduce using rule 12 (parte_parametros)
+
+    parte_parametros  go to state 51
 
 
 State 37
 
-   40 parte_atribuicao_chamada_proc: IDENT • $@7 atribuicao_chamada_proc
+   51 parte_atribuicao_chamada_proc: IDENT • $@9 atribuicao_chamada_proc
 
-    $default  reduce using rule 39 ($@7)
+    $default  reduce using rule 50 ($@9)
 
-    $@7  go to state 51
+    $@9  go to state 52
 
 
 State 38
 
-   66 if_completo: IF • $@8 if_comp $@9 THEN comando $@10 if_else
+   77 if_completo: IF • $@10 if_comp $@11 THEN comando $@12 if_else
 
-    $default  reduce using rule 63 ($@8)
+    $default  reduce using rule 74 ($@10)
 
-    $@8  go to state 52
+    $@10  go to state 53
 
 
 State 39
 
-   35 read: READ • ABRE_PARENTESES vars_read FECHA_PARENTESES
-
-    ABRE_PARENTESES  shift, and go to state 53
-
-
-State 40
-
-   30 write: WRITE • ABRE_PARENTESES vars_write FECHA_PARENTESES
+   46 read: READ • ABRE_PARENTESES vars_read FECHA_PARENTESES
 
     ABRE_PARENTESES  shift, and go to state 54
 
 
+State 40
+
+   41 write: WRITE • ABRE_PARENTESES vars_write FECHA_PARENTESES
+
+    ABRE_PARENTESES  shift, and go to state 55
+
+
 State 41
 
-   22 comando_composto: T_BEGIN comandos • T_END
-   23 comandos: comandos • PONTO_E_VIRGULA comando
+   33 comando_composto: T_BEGIN comandos • T_END
+   34 comandos: comandos • PONTO_E_VIRGULA comando
 
-    PONTO_E_VIRGULA  shift, and go to state 55
-    T_END            shift, and go to state 56
+    PONTO_E_VIRGULA  shift, and go to state 56
+    T_END            shift, and go to state 57
 
 
 State 42
 
-   24 comandos: comando •
+   35 comandos: comando •
 
-    $default  reduce using rule 24 (comandos)
+    $default  reduce using rule 35 (comandos)
 
 
 State 43
 
-   26 comando: write •
+   37 comando: write •
 
-    $default  reduce using rule 26 (comando)
+    $default  reduce using rule 37 (comando)
 
 
 State 44
 
-   27 comando: read •
+   38 comando: read •
 
-    $default  reduce using rule 27 (comando)
+    $default  reduce using rule 38 (comando)
 
 
 State 45
 
-   25 comando: parte_atribuicao_chamada_proc •
+   36 comando: parte_atribuicao_chamada_proc •
 
-    $default  reduce using rule 25 (comando)
+    $default  reduce using rule 36 (comando)
 
 
 State 46
 
-   29 comando: if_completo •
+   40 comando: if_completo •
 
-    $default  reduce using rule 29 (comando)
+    $default  reduce using rule 40 (comando)
 
 
 State 47
 
-   28 comando: while •
+   39 comando: while •
 
-    $default  reduce using rule 28 (comando)
+    $default  reduce using rule 39 (comando)
 
 
 State 48
 
-   72 while: $@11 • WHILE comparacao DO $@12 comando_composto
+   83 while: $@13 • WHILE comparacao DO $@14 comando_composto
 
-    WHILE  shift, and go to state 57
+    WHILE  shift, and go to state 58
 
 
 State 49
 
-   16 declara_var: lista_id_var DOIS_PONTOS tipo $@6 • PONTO_E_VIRGULA
+   27 declara_var: lista_id_var DOIS_PONTOS tipo $@8 • PONTO_E_VIRGULA
 
-    PONTO_E_VIRGULA  shift, and go to state 58
+    PONTO_E_VIRGULA  shift, and go to state 59
 
 
 State 50
 
-    9 declara_proced_func: PROCEDURE IDENT $@4 PONTO_E_VIRGULA • bloco
+   11 parte_parametros: ABRE_PARENTESES • parametros $@5 FECHA_PARENTESES
 
-    VAR       reduce using rule 10 ($@5)
-    $default  reduce using rule 12 (parte_declara_vars)
+    VAR  shift, and go to state 60
 
-    bloco               go to state 59
-    parte_declara_vars  go to state 14
-    $@5                 go to state 15
+    VAR       [reduce using rule 13 ($@6)]
+    IDENT     reduce using rule 13 ($@6)
+    IDENT     [reduce using rule 18 (passagem)]
+    $default  reduce using rule 13 ($@6)
+
+    parametros  go to state 61
+    $@6         go to state 62
+    parametro   go to state 63
+    passagem    go to state 64
 
 
 State 51
 
-   40 parte_atribuicao_chamada_proc: IDENT $@7 • atribuicao_chamada_proc
+    9 declara_proced_func: PROCEDURE IDENT $@4 parte_parametros • PONTO_E_VIRGULA bloco
 
-    ATRIBUICAO  shift, and go to state 60
-
-    $default  reduce using rule 43 (chamada_proc)
-
-    atribuicao_chamada_proc  go to state 61
-    chamada_proc             go to state 62
-    atribuicao               go to state 63
+    PONTO_E_VIRGULA  shift, and go to state 65
 
 
 State 52
 
-   66 if_completo: IF $@8 • if_comp $@9 THEN comando $@10 if_else
+   51 parte_atribuicao_chamada_proc: IDENT $@9 • atribuicao_chamada_proc
 
-    ABRE_PARENTESES  shift, and go to state 64
+    ATRIBUICAO  shift, and go to state 66
 
-    if_comp  go to state 65
+    $default  reduce using rule 54 (chamada_proc)
+
+    atribuicao_chamada_proc  go to state 67
+    chamada_proc             go to state 68
+    atribuicao               go to state 69
 
 
 State 53
 
-   35 read: READ ABRE_PARENTESES • vars_read FECHA_PARENTESES
+   77 if_completo: IF $@10 • if_comp $@11 THEN comando $@12 if_else
 
-    IDENT  shift, and go to state 66
+    ABRE_PARENTESES  shift, and go to state 70
 
-    vars_read  go to state 67
-    var_read   go to state 68
+    if_comp  go to state 71
 
 
 State 54
 
-   30 write: WRITE ABRE_PARENTESES • vars_write FECHA_PARENTESES
+   46 read: READ ABRE_PARENTESES • vars_read FECHA_PARENTESES
 
-    IDENT   shift, and go to state 69
-    NUMERO  shift, and go to state 70
+    IDENT  shift, and go to state 72
 
-    vars_write  go to state 71
-    var_write   go to state 72
+    vars_read  go to state 73
+    var_read   go to state 74
 
 
 State 55
 
-   23 comandos: comandos PONTO_E_VIRGULA • comando
+   41 write: WRITE ABRE_PARENTESES • vars_write FECHA_PARENTESES
 
-    IDENT  shift, and go to state 37
-    IF     shift, and go to state 38
-    READ   shift, and go to state 39
-    WRITE  shift, and go to state 40
+    IDENT   shift, and go to state 75
+    NUMERO  shift, and go to state 76
 
-    $default  reduce using rule 70 ($@11)
-
-    comando                        go to state 73
-    write                          go to state 43
-    read                           go to state 44
-    parte_atribuicao_chamada_proc  go to state 45
-    if_completo                    go to state 46
-    while                          go to state 47
-    $@11                           go to state 48
+    vars_write  go to state 77
+    var_write   go to state 78
 
 
 State 56
 
-   22 comando_composto: T_BEGIN comandos T_END •
+   34 comandos: comandos PONTO_E_VIRGULA • comando
 
-    $default  reduce using rule 22 (comando_composto)
+    IDENT  shift, and go to state 37
+    IF     shift, and go to state 38
+    READ   shift, and go to state 39
+    WRITE  shift, and go to state 40
+
+    $default  reduce using rule 81 ($@13)
+
+    comando                        go to state 79
+    write                          go to state 43
+    read                           go to state 44
+    parte_atribuicao_chamada_proc  go to state 45
+    if_completo                    go to state 46
+    while                          go to state 47
+    $@13                           go to state 48
 
 
 State 57
 
-   72 while: $@11 WHILE • comparacao DO $@12 comando_composto
+   33 comando_composto: T_BEGIN comandos T_END •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    comparacao  go to state 77
-    expr        go to state 78
-    mult        go to state 79
-    operando    go to state 80
-    ident       go to state 81
+    $default  reduce using rule 33 (comando_composto)
 
 
 State 58
 
-   16 declara_var: lista_id_var DOIS_PONTOS tipo $@6 PONTO_E_VIRGULA •
+   83 while: $@13 WHILE • comparacao DO $@14 comando_composto
 
-    $default  reduce using rule 16 (declara_var)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    comparacao  go to state 83
+    expr        go to state 84
+    mult        go to state 85
+    operando    go to state 86
+    ident       go to state 87
 
 
 State 59
 
-    9 declara_proced_func: PROCEDURE IDENT $@4 PONTO_E_VIRGULA bloco •
+   27 declara_var: lista_id_var DOIS_PONTOS tipo $@8 PONTO_E_VIRGULA •
 
-    $default  reduce using rule 9 (declara_proced_func)
+    $default  reduce using rule 27 (declara_var)
 
 
 State 60
 
-   44 atribuicao: ATRIBUICAO • comparacao
+   17 passagem: VAR •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    comparacao  go to state 82
-    expr        go to state 78
-    mult        go to state 79
-    operando    go to state 80
-    ident       go to state 81
+    $default  reduce using rule 17 (passagem)
 
 
 State 61
 
-   40 parte_atribuicao_chamada_proc: IDENT $@7 atribuicao_chamada_proc •
+   11 parte_parametros: ABRE_PARENTESES parametros • $@5 FECHA_PARENTESES
 
-    $default  reduce using rule 40 (parte_atribuicao_chamada_proc)
+    $default  reduce using rule 10 ($@5)
+
+    $@5  go to state 88
 
 
 State 62
 
-   42 atribuicao_chamada_proc: chamada_proc •
+   14 parametros: $@6 • parametros PONTO_E_VIRGULA parametro
 
-    $default  reduce using rule 42 (atribuicao_chamada_proc)
+    VAR  shift, and go to state 60
+
+    VAR       [reduce using rule 13 ($@6)]
+    IDENT     reduce using rule 13 ($@6)
+    IDENT     [reduce using rule 18 (passagem)]
+    $default  reduce using rule 13 ($@6)
+
+    parametros  go to state 89
+    $@6         go to state 62
+    parametro   go to state 63
+    passagem    go to state 64
 
 
 State 63
 
-   41 atribuicao_chamada_proc: atribuicao •
+   15 parametros: parametro •
 
-    $default  reduce using rule 41 (atribuicao_chamada_proc)
+    $default  reduce using rule 15 (parametros)
 
 
 State 64
 
-   67 if_comp: ABRE_PARENTESES • comparacao FECHA_PARENTESES
+   16 parametro: passagem • parametro_tipo DOIS_PONTOS tipo
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
+    IDENT  shift, and go to state 90
 
-    comparacao  go to state 83
-    expr        go to state 78
-    mult        go to state 79
-    operando    go to state 80
-    ident       go to state 81
+    parametro_tipo  go to state 91
 
 
 State 65
 
-   66 if_completo: IF $@8 if_comp • $@9 THEN comando $@10 if_else
+    9 declara_proced_func: PROCEDURE IDENT $@4 parte_parametros PONTO_E_VIRGULA • bloco
 
-    $default  reduce using rule 64 ($@9)
+    VAR       reduce using rule 21 ($@7)
+    $default  reduce using rule 23 (parte_declara_vars)
 
-    $@9  go to state 84
+    bloco               go to state 92
+    parte_declara_vars  go to state 14
+    $@7                 go to state 15
 
 
 State 66
 
-   38 var_read: IDENT •
+   55 atribuicao: ATRIBUICAO • comparacao
 
-    $default  reduce using rule 38 (var_read)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    comparacao  go to state 93
+    expr        go to state 84
+    mult        go to state 85
+    operando    go to state 86
+    ident       go to state 87
 
 
 State 67
 
-   35 read: READ ABRE_PARENTESES vars_read • FECHA_PARENTESES
-   36 vars_read: vars_read • VIRGULA var_read
+   51 parte_atribuicao_chamada_proc: IDENT $@9 atribuicao_chamada_proc •
 
-    FECHA_PARENTESES  shift, and go to state 85
-    VIRGULA           shift, and go to state 86
+    $default  reduce using rule 51 (parte_atribuicao_chamada_proc)
 
 
 State 68
 
-   37 vars_read: var_read •
+   53 atribuicao_chamada_proc: chamada_proc •
 
-    $default  reduce using rule 37 (vars_read)
+    $default  reduce using rule 53 (atribuicao_chamada_proc)
 
 
 State 69
 
-   33 var_write: IDENT •
+   52 atribuicao_chamada_proc: atribuicao •
 
-    $default  reduce using rule 33 (var_write)
+    $default  reduce using rule 52 (atribuicao_chamada_proc)
 
 
 State 70
 
-   34 var_write: NUMERO •
+   78 if_comp: ABRE_PARENTESES • comparacao FECHA_PARENTESES
 
-    $default  reduce using rule 34 (var_write)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    comparacao  go to state 94
+    expr        go to state 84
+    mult        go to state 85
+    operando    go to state 86
+    ident       go to state 87
 
 
 State 71
 
-   30 write: WRITE ABRE_PARENTESES vars_write • FECHA_PARENTESES
-   31 vars_write: vars_write • VIRGULA var_write
+   77 if_completo: IF $@10 if_comp • $@11 THEN comando $@12 if_else
 
-    FECHA_PARENTESES  shift, and go to state 87
-    VIRGULA           shift, and go to state 88
+    $default  reduce using rule 75 ($@11)
+
+    $@11  go to state 95
 
 
 State 72
 
-   32 vars_write: var_write •
+   49 var_read: IDENT •
 
-    $default  reduce using rule 32 (vars_write)
+    $default  reduce using rule 49 (var_read)
 
 
 State 73
 
-   23 comandos: comandos PONTO_E_VIRGULA comando •
+   46 read: READ ABRE_PARENTESES vars_read • FECHA_PARENTESES
+   47 vars_read: vars_read • VIRGULA var_read
 
-    $default  reduce using rule 23 (comandos)
+    FECHA_PARENTESES  shift, and go to state 96
+    VIRGULA           shift, and go to state 97
 
 
 State 74
 
-   59 operando: ABRE_PARENTESES • comparacao FECHA_PARENTESES
+   48 vars_read: var_read •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    comparacao  go to state 89
-    expr        go to state 78
-    mult        go to state 79
-    operando    go to state 80
-    ident       go to state 81
+    $default  reduce using rule 48 (vars_read)
 
 
 State 75
 
-   62 ident: IDENT •
+   44 var_write: IDENT •
 
-    $default  reduce using rule 62 (ident)
+    $default  reduce using rule 44 (var_write)
 
 
 State 76
 
-   61 operando: NUMERO •
+   45 var_write: NUMERO •
 
-    $default  reduce using rule 61 (operando)
+    $default  reduce using rule 45 (var_write)
 
 
 State 77
 
-   45 comparacao: comparacao • IGUAL expr
-   46           | comparacao • MENOR expr
-   47           | comparacao • MAIOR expr
-   48           | comparacao • MENOR_IGUAL expr
-   49           | comparacao • MAIOR_IGUAL expr
-   72 while: $@11 WHILE comparacao • DO $@12 comando_composto
+   41 write: WRITE ABRE_PARENTESES vars_write • FECHA_PARENTESES
+   42 vars_write: vars_write • VIRGULA var_write
 
-    DO           shift, and go to state 90
-    IGUAL        shift, and go to state 91
-    MENOR        shift, and go to state 92
-    MENOR_IGUAL  shift, and go to state 93
-    MAIOR        shift, and go to state 94
-    MAIOR_IGUAL  shift, and go to state 95
+    FECHA_PARENTESES  shift, and go to state 98
+    VIRGULA           shift, and go to state 99
 
 
 State 78
 
-   50 comparacao: expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   43 vars_write: var_write •
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
-
-    $default  reduce using rule 50 (comparacao)
+    $default  reduce using rule 43 (vars_write)
 
 
 State 79
 
-   54 expr: mult •
-   55 mult: mult • MULTIPLICACAO operando
-   56     | mult • DIV operando
-   57     | mult • AND operando
+   34 comandos: comandos PONTO_E_VIRGULA comando •
 
-    DIV            shift, and go to state 99
-    MULTIPLICACAO  shift, and go to state 100
-    AND            shift, and go to state 101
-
-    $default  reduce using rule 54 (expr)
+    $default  reduce using rule 34 (comandos)
 
 
 State 80
 
-   58 mult: operando •
+   70 operando: ABRE_PARENTESES • comparacao FECHA_PARENTESES
 
-    $default  reduce using rule 58 (mult)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    comparacao  go to state 100
+    expr        go to state 84
+    mult        go to state 85
+    operando    go to state 86
+    ident       go to state 87
 
 
 State 81
 
-   60 operando: ident •
+   73 ident: IDENT •
 
-    $default  reduce using rule 60 (operando)
+    $default  reduce using rule 73 (ident)
 
 
 State 82
 
-   44 atribuicao: ATRIBUICAO comparacao •
-   45 comparacao: comparacao • IGUAL expr
-   46           | comparacao • MENOR expr
-   47           | comparacao • MAIOR expr
-   48           | comparacao • MENOR_IGUAL expr
-   49           | comparacao • MAIOR_IGUAL expr
+   72 operando: NUMERO •
 
-    IGUAL        shift, and go to state 91
-    MENOR        shift, and go to state 92
-    MENOR_IGUAL  shift, and go to state 93
-    MAIOR        shift, and go to state 94
-    MAIOR_IGUAL  shift, and go to state 95
-
-    $default  reduce using rule 44 (atribuicao)
+    $default  reduce using rule 72 (operando)
 
 
 State 83
 
-   45 comparacao: comparacao • IGUAL expr
-   46           | comparacao • MENOR expr
-   47           | comparacao • MAIOR expr
-   48           | comparacao • MENOR_IGUAL expr
-   49           | comparacao • MAIOR_IGUAL expr
-   67 if_comp: ABRE_PARENTESES comparacao • FECHA_PARENTESES
+   56 comparacao: comparacao • IGUAL expr
+   57           | comparacao • MENOR expr
+   58           | comparacao • MAIOR expr
+   59           | comparacao • MENOR_IGUAL expr
+   60           | comparacao • MAIOR_IGUAL expr
+   83 while: $@13 WHILE comparacao • DO $@14 comando_composto
 
-    FECHA_PARENTESES  shift, and go to state 102
-    IGUAL             shift, and go to state 91
-    MENOR             shift, and go to state 92
-    MENOR_IGUAL       shift, and go to state 93
-    MAIOR             shift, and go to state 94
-    MAIOR_IGUAL       shift, and go to state 95
+    DO           shift, and go to state 101
+    IGUAL        shift, and go to state 102
+    MENOR        shift, and go to state 103
+    MENOR_IGUAL  shift, and go to state 104
+    MAIOR        shift, and go to state 105
+    MAIOR_IGUAL  shift, and go to state 106
 
 
 State 84
 
-   66 if_completo: IF $@8 if_comp $@9 • THEN comando $@10 if_else
+   61 comparacao: expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
 
-    THEN  shift, and go to state 103
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 61 (comparacao)
 
 
 State 85
 
-   35 read: READ ABRE_PARENTESES vars_read FECHA_PARENTESES •
+   65 expr: mult •
+   66 mult: mult • MULTIPLICACAO operando
+   67     | mult • DIV operando
+   68     | mult • AND operando
 
-    $default  reduce using rule 35 (read)
+    DIV            shift, and go to state 110
+    MULTIPLICACAO  shift, and go to state 111
+    AND            shift, and go to state 112
+
+    $default  reduce using rule 65 (expr)
 
 
 State 86
 
-   36 vars_read: vars_read VIRGULA • var_read
+   69 mult: operando •
 
-    IDENT  shift, and go to state 66
-
-    var_read  go to state 104
+    $default  reduce using rule 69 (mult)
 
 
 State 87
 
-   30 write: WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES •
+   71 operando: ident •
 
-    $default  reduce using rule 30 (write)
+    $default  reduce using rule 71 (operando)
 
 
 State 88
 
-   31 vars_write: vars_write VIRGULA • var_write
+   11 parte_parametros: ABRE_PARENTESES parametros $@5 • FECHA_PARENTESES
 
-    IDENT   shift, and go to state 69
-    NUMERO  shift, and go to state 70
-
-    var_write  go to state 105
+    FECHA_PARENTESES  shift, and go to state 113
 
 
 State 89
 
-   45 comparacao: comparacao • IGUAL expr
-   46           | comparacao • MENOR expr
-   47           | comparacao • MAIOR expr
-   48           | comparacao • MENOR_IGUAL expr
-   49           | comparacao • MAIOR_IGUAL expr
-   59 operando: ABRE_PARENTESES comparacao • FECHA_PARENTESES
+   14 parametros: $@6 parametros • PONTO_E_VIRGULA parametro
 
-    FECHA_PARENTESES  shift, and go to state 106
-    IGUAL             shift, and go to state 91
-    MENOR             shift, and go to state 92
-    MENOR_IGUAL       shift, and go to state 93
-    MAIOR             shift, and go to state 94
-    MAIOR_IGUAL       shift, and go to state 95
+    PONTO_E_VIRGULA  shift, and go to state 114
 
 
 State 90
 
-   72 while: $@11 WHILE comparacao DO • $@12 comando_composto
+   20 parametro_tipo: IDENT •
 
-    $default  reduce using rule 71 ($@12)
-
-    $@12  go to state 107
+    $default  reduce using rule 20 (parametro_tipo)
 
 
 State 91
 
-   45 comparacao: comparacao IGUAL • expr
+   16 parametro: passagem parametro_tipo • DOIS_PONTOS tipo
+   19 parametro_tipo: parametro_tipo • VIRGULA IDENT
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    expr      go to state 108
-    mult      go to state 79
-    operando  go to state 80
-    ident     go to state 81
+    VIRGULA      shift, and go to state 115
+    DOIS_PONTOS  shift, and go to state 116
 
 
 State 92
 
-   46 comparacao: comparacao MENOR • expr
+    9 declara_proced_func: PROCEDURE IDENT $@4 parte_parametros PONTO_E_VIRGULA bloco •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    expr      go to state 109
-    mult      go to state 79
-    operando  go to state 80
-    ident     go to state 81
+    $default  reduce using rule 9 (declara_proced_func)
 
 
 State 93
 
-   48 comparacao: comparacao MENOR_IGUAL • expr
+   55 atribuicao: ATRIBUICAO comparacao •
+   56 comparacao: comparacao • IGUAL expr
+   57           | comparacao • MENOR expr
+   58           | comparacao • MAIOR expr
+   59           | comparacao • MENOR_IGUAL expr
+   60           | comparacao • MAIOR_IGUAL expr
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
+    IGUAL        shift, and go to state 102
+    MENOR        shift, and go to state 103
+    MENOR_IGUAL  shift, and go to state 104
+    MAIOR        shift, and go to state 105
+    MAIOR_IGUAL  shift, and go to state 106
 
-    expr      go to state 110
-    mult      go to state 79
-    operando  go to state 80
-    ident     go to state 81
+    $default  reduce using rule 55 (atribuicao)
 
 
 State 94
 
-   47 comparacao: comparacao MAIOR • expr
+   56 comparacao: comparacao • IGUAL expr
+   57           | comparacao • MENOR expr
+   58           | comparacao • MAIOR expr
+   59           | comparacao • MENOR_IGUAL expr
+   60           | comparacao • MAIOR_IGUAL expr
+   78 if_comp: ABRE_PARENTESES comparacao • FECHA_PARENTESES
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    expr      go to state 111
-    mult      go to state 79
-    operando  go to state 80
-    ident     go to state 81
+    FECHA_PARENTESES  shift, and go to state 117
+    IGUAL             shift, and go to state 102
+    MENOR             shift, and go to state 103
+    MENOR_IGUAL       shift, and go to state 104
+    MAIOR             shift, and go to state 105
+    MAIOR_IGUAL       shift, and go to state 106
 
 
 State 95
 
-   49 comparacao: comparacao MAIOR_IGUAL • expr
+   77 if_completo: IF $@10 if_comp $@11 • THEN comando $@12 if_else
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    expr      go to state 112
-    mult      go to state 79
-    operando  go to state 80
-    ident     go to state 81
+    THEN  shift, and go to state 118
 
 
 State 96
 
-   53 expr: expr OR • mult
+   46 read: READ ABRE_PARENTESES vars_read FECHA_PARENTESES •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    mult      go to state 113
-    operando  go to state 80
-    ident     go to state 81
+    $default  reduce using rule 46 (read)
 
 
 State 97
 
-   51 expr: expr MAIS • mult
+   47 vars_read: vars_read VIRGULA • var_read
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
+    IDENT  shift, and go to state 72
 
-    mult      go to state 114
-    operando  go to state 80
-    ident     go to state 81
+    var_read  go to state 119
 
 
 State 98
 
-   52 expr: expr MENOS • mult
+   41 write: WRITE ABRE_PARENTESES vars_write FECHA_PARENTESES •
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    mult      go to state 115
-    operando  go to state 80
-    ident     go to state 81
+    $default  reduce using rule 41 (write)
 
 
 State 99
 
-   56 mult: mult DIV • operando
+   42 vars_write: vars_write VIRGULA • var_write
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
+    IDENT   shift, and go to state 75
+    NUMERO  shift, and go to state 76
 
-    operando  go to state 116
-    ident     go to state 81
+    var_write  go to state 120
 
 
 State 100
 
-   55 mult: mult MULTIPLICACAO • operando
+   56 comparacao: comparacao • IGUAL expr
+   57           | comparacao • MENOR expr
+   58           | comparacao • MAIOR expr
+   59           | comparacao • MENOR_IGUAL expr
+   60           | comparacao • MAIOR_IGUAL expr
+   70 operando: ABRE_PARENTESES comparacao • FECHA_PARENTESES
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
-
-    operando  go to state 117
-    ident     go to state 81
+    FECHA_PARENTESES  shift, and go to state 121
+    IGUAL             shift, and go to state 102
+    MENOR             shift, and go to state 103
+    MENOR_IGUAL       shift, and go to state 104
+    MAIOR             shift, and go to state 105
+    MAIOR_IGUAL       shift, and go to state 106
 
 
 State 101
 
-   57 mult: mult AND • operando
+   83 while: $@13 WHILE comparacao DO • $@14 comando_composto
 
-    ABRE_PARENTESES  shift, and go to state 74
-    IDENT            shift, and go to state 75
-    NUMERO           shift, and go to state 76
+    $default  reduce using rule 82 ($@14)
 
-    operando  go to state 118
-    ident     go to state 81
+    $@14  go to state 122
 
 
 State 102
 
-   67 if_comp: ABRE_PARENTESES comparacao FECHA_PARENTESES •
+   56 comparacao: comparacao IGUAL • expr
 
-    $default  reduce using rule 67 (if_comp)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    expr      go to state 123
+    mult      go to state 85
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 103
 
-   66 if_completo: IF $@8 if_comp $@9 THEN • comando $@10 if_else
+   57 comparacao: comparacao MENOR • expr
 
-    IDENT  shift, and go to state 37
-    IF     shift, and go to state 38
-    READ   shift, and go to state 39
-    WRITE  shift, and go to state 40
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 70 ($@11)
-
-    comando                        go to state 119
-    write                          go to state 43
-    read                           go to state 44
-    parte_atribuicao_chamada_proc  go to state 45
-    if_completo                    go to state 46
-    while                          go to state 47
-    $@11                           go to state 48
+    expr      go to state 124
+    mult      go to state 85
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 104
 
-   36 vars_read: vars_read VIRGULA var_read •
+   59 comparacao: comparacao MENOR_IGUAL • expr
 
-    $default  reduce using rule 36 (vars_read)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    expr      go to state 125
+    mult      go to state 85
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 105
 
-   31 vars_write: vars_write VIRGULA var_write •
+   58 comparacao: comparacao MAIOR • expr
 
-    $default  reduce using rule 31 (vars_write)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    expr      go to state 126
+    mult      go to state 85
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 106
 
-   59 operando: ABRE_PARENTESES comparacao FECHA_PARENTESES •
+   60 comparacao: comparacao MAIOR_IGUAL • expr
 
-    $default  reduce using rule 59 (operando)
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
+
+    expr      go to state 127
+    mult      go to state 85
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 107
 
-   72 while: $@11 WHILE comparacao DO $@12 • comando_composto
+   64 expr: expr OR • mult
 
-    T_BEGIN  shift, and go to state 31
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    comando_composto  go to state 120
+    mult      go to state 128
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 108
 
-   45 comparacao: comparacao IGUAL expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   62 expr: expr MAIS • mult
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 45 (comparacao)
+    mult      go to state 129
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 109
 
-   46 comparacao: comparacao MENOR expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   63 expr: expr MENOS • mult
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 46 (comparacao)
+    mult      go to state 130
+    operando  go to state 86
+    ident     go to state 87
 
 
 State 110
 
-   48 comparacao: comparacao MENOR_IGUAL expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   67 mult: mult DIV • operando
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 48 (comparacao)
+    operando  go to state 131
+    ident     go to state 87
 
 
 State 111
 
-   47 comparacao: comparacao MAIOR expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   66 mult: mult MULTIPLICACAO • operando
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 47 (comparacao)
+    operando  go to state 132
+    ident     go to state 87
 
 
 State 112
 
-   49 comparacao: comparacao MAIOR_IGUAL expr •
-   51 expr: expr • MAIS mult
-   52     | expr • MENOS mult
-   53     | expr • OR mult
+   68 mult: mult AND • operando
 
-    OR     shift, and go to state 96
-    MAIS   shift, and go to state 97
-    MENOS  shift, and go to state 98
+    ABRE_PARENTESES  shift, and go to state 80
+    IDENT            shift, and go to state 81
+    NUMERO           shift, and go to state 82
 
-    $default  reduce using rule 49 (comparacao)
+    operando  go to state 133
+    ident     go to state 87
 
 
 State 113
 
-   53 expr: expr OR mult •
-   55 mult: mult • MULTIPLICACAO operando
-   56     | mult • DIV operando
-   57     | mult • AND operando
+   11 parte_parametros: ABRE_PARENTESES parametros $@5 FECHA_PARENTESES •
 
-    DIV            shift, and go to state 99
-    MULTIPLICACAO  shift, and go to state 100
-    AND            shift, and go to state 101
-
-    $default  reduce using rule 53 (expr)
+    $default  reduce using rule 11 (parte_parametros)
 
 
 State 114
 
-   51 expr: expr MAIS mult •
-   55 mult: mult • MULTIPLICACAO operando
-   56     | mult • DIV operando
-   57     | mult • AND operando
+   14 parametros: $@6 parametros PONTO_E_VIRGULA • parametro
 
-    DIV            shift, and go to state 99
-    MULTIPLICACAO  shift, and go to state 100
-    AND            shift, and go to state 101
+    VAR  shift, and go to state 60
 
-    $default  reduce using rule 51 (expr)
+    $default  reduce using rule 18 (passagem)
+
+    parametro  go to state 134
+    passagem   go to state 64
 
 
 State 115
 
-   52 expr: expr MENOS mult •
-   55 mult: mult • MULTIPLICACAO operando
-   56     | mult • DIV operando
-   57     | mult • AND operando
+   19 parametro_tipo: parametro_tipo VIRGULA • IDENT
 
-    DIV            shift, and go to state 99
-    MULTIPLICACAO  shift, and go to state 100
-    AND            shift, and go to state 101
-
-    $default  reduce using rule 52 (expr)
+    IDENT  shift, and go to state 135
 
 
 State 116
 
-   56 mult: mult DIV operando •
+   16 parametro: passagem parametro_tipo DOIS_PONTOS • tipo
 
-    $default  reduce using rule 56 (mult)
+    INTEGER  shift, and go to state 34
+
+    tipo  go to state 136
 
 
 State 117
 
-   55 mult: mult MULTIPLICACAO operando •
+   78 if_comp: ABRE_PARENTESES comparacao FECHA_PARENTESES •
 
-    $default  reduce using rule 55 (mult)
+    $default  reduce using rule 78 (if_comp)
 
 
 State 118
 
-   57 mult: mult AND operando •
-
-    $default  reduce using rule 57 (mult)
-
-
-State 119
-
-   66 if_completo: IF $@8 if_comp $@9 THEN comando • $@10 if_else
-
-    $default  reduce using rule 65 ($@10)
-
-    $@10  go to state 121
-
-
-State 120
-
-   72 while: $@11 WHILE comparacao DO $@12 comando_composto •
-
-    $default  reduce using rule 72 (while)
-
-
-State 121
-
-   66 if_completo: IF $@8 if_comp $@9 THEN comando $@10 • if_else
-
-    ELSE  shift, and go to state 122
-
-    $default  reduce using rule 69 (if_else)
-
-    if_else  go to state 123
-
-
-State 122
-
-   68 if_else: ELSE • comando
+   77 if_completo: IF $@10 if_comp $@11 THEN • comando $@12 if_else
 
     IDENT  shift, and go to state 37
     IF     shift, and go to state 38
     READ   shift, and go to state 39
     WRITE  shift, and go to state 40
 
-    $default  reduce using rule 70 ($@11)
+    $default  reduce using rule 81 ($@13)
 
-    comando                        go to state 124
+    comando                        go to state 137
     write                          go to state 43
     read                           go to state 44
     parte_atribuicao_chamada_proc  go to state 45
     if_completo                    go to state 46
     while                          go to state 47
-    $@11                           go to state 48
+    $@13                           go to state 48
+
+
+State 119
+
+   47 vars_read: vars_read VIRGULA var_read •
+
+    $default  reduce using rule 47 (vars_read)
+
+
+State 120
+
+   42 vars_write: vars_write VIRGULA var_write •
+
+    $default  reduce using rule 42 (vars_write)
+
+
+State 121
+
+   70 operando: ABRE_PARENTESES comparacao FECHA_PARENTESES •
+
+    $default  reduce using rule 70 (operando)
+
+
+State 122
+
+   83 while: $@13 WHILE comparacao DO $@14 • comando_composto
+
+    T_BEGIN  shift, and go to state 31
+
+    comando_composto  go to state 138
 
 
 State 123
 
-   66 if_completo: IF $@8 if_comp $@9 THEN comando $@10 if_else •
+   56 comparacao: comparacao IGUAL expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
 
-    $default  reduce using rule 66 (if_completo)
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 56 (comparacao)
 
 
 State 124
 
-   68 if_else: ELSE comando •
+   57 comparacao: comparacao MENOR expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
 
-    $default  reduce using rule 68 (if_else)
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 57 (comparacao)
+
+
+State 125
+
+   59 comparacao: comparacao MENOR_IGUAL expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
+
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 59 (comparacao)
+
+
+State 126
+
+   58 comparacao: comparacao MAIOR expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
+
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 58 (comparacao)
+
+
+State 127
+
+   60 comparacao: comparacao MAIOR_IGUAL expr •
+   62 expr: expr • MAIS mult
+   63     | expr • MENOS mult
+   64     | expr • OR mult
+
+    OR     shift, and go to state 107
+    MAIS   shift, and go to state 108
+    MENOS  shift, and go to state 109
+
+    $default  reduce using rule 60 (comparacao)
+
+
+State 128
+
+   64 expr: expr OR mult •
+   66 mult: mult • MULTIPLICACAO operando
+   67     | mult • DIV operando
+   68     | mult • AND operando
+
+    DIV            shift, and go to state 110
+    MULTIPLICACAO  shift, and go to state 111
+    AND            shift, and go to state 112
+
+    $default  reduce using rule 64 (expr)
+
+
+State 129
+
+   62 expr: expr MAIS mult •
+   66 mult: mult • MULTIPLICACAO operando
+   67     | mult • DIV operando
+   68     | mult • AND operando
+
+    DIV            shift, and go to state 110
+    MULTIPLICACAO  shift, and go to state 111
+    AND            shift, and go to state 112
+
+    $default  reduce using rule 62 (expr)
+
+
+State 130
+
+   63 expr: expr MENOS mult •
+   66 mult: mult • MULTIPLICACAO operando
+   67     | mult • DIV operando
+   68     | mult • AND operando
+
+    DIV            shift, and go to state 110
+    MULTIPLICACAO  shift, and go to state 111
+    AND            shift, and go to state 112
+
+    $default  reduce using rule 63 (expr)
+
+
+State 131
+
+   67 mult: mult DIV operando •
+
+    $default  reduce using rule 67 (mult)
+
+
+State 132
+
+   66 mult: mult MULTIPLICACAO operando •
+
+    $default  reduce using rule 66 (mult)
+
+
+State 133
+
+   68 mult: mult AND operando •
+
+    $default  reduce using rule 68 (mult)
+
+
+State 134
+
+   14 parametros: $@6 parametros PONTO_E_VIRGULA parametro •
+
+    $default  reduce using rule 14 (parametros)
+
+
+State 135
+
+   19 parametro_tipo: parametro_tipo VIRGULA IDENT •
+
+    $default  reduce using rule 19 (parametro_tipo)
+
+
+State 136
+
+   16 parametro: passagem parametro_tipo DOIS_PONTOS tipo •
+
+    $default  reduce using rule 16 (parametro)
+
+
+State 137
+
+   77 if_completo: IF $@10 if_comp $@11 THEN comando • $@12 if_else
+
+    $default  reduce using rule 76 ($@12)
+
+    $@12  go to state 139
+
+
+State 138
+
+   83 while: $@13 WHILE comparacao DO $@14 comando_composto •
+
+    $default  reduce using rule 83 (while)
+
+
+State 139
+
+   77 if_completo: IF $@10 if_comp $@11 THEN comando $@12 • if_else
+
+    ELSE  shift, and go to state 140
+
+    $default  reduce using rule 80 (if_else)
+
+    if_else  go to state 141
+
+
+State 140
+
+   79 if_else: ELSE • comando
+
+    IDENT  shift, and go to state 37
+    IF     shift, and go to state 38
+    READ   shift, and go to state 39
+    WRITE  shift, and go to state 40
+
+    $default  reduce using rule 81 ($@13)
+
+    comando                        go to state 142
+    write                          go to state 43
+    read                           go to state 44
+    parte_atribuicao_chamada_proc  go to state 45
+    if_completo                    go to state 46
+    while                          go to state 47
+    $@13                           go to state 48
+
+
+State 141
+
+   77 if_completo: IF $@10 if_comp $@11 THEN comando $@12 if_else •
+
+    $default  reduce using rule 77 (if_completo)
+
+
+State 142
+
+   79 if_else: ELSE comando •
+
+    $default  reduce using rule 79 (if_else)

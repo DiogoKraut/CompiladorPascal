@@ -26,6 +26,8 @@ int var_count;
 int proc_count;
 int prox_rot;
 
+int passagem_tipo;
+
 char l_elem[TAM_TOKEN];
 char *rotulo;
 int rot_count;
@@ -137,10 +139,72 @@ declara_proced_func : PROCEDURE IDENT
                       strncpy(simb->rot, (char*)peek(pilha_rotulos), 4);
                       insere_tabela(tab_simb, simb);
 
-                    } PONTO_E_VIRGULA bloco
+                    }
+                    parte_parametros 
+                    PONTO_E_VIRGULA bloco
 ;
 
-parte_declara_vars  : { var_count = 0;} VAR declara_vars
+parte_parametros: ABRE_PARENTESES
+                  parametros
+                  {
+                    printf("%d\n", var_count);
+                    ajustaDeslocamentoParams(tab_simb, var_count);
+                  }
+                  FECHA_PARENTESES
+                  |
+;
+
+parametros: { var_count = 0;} 
+            parametros PONTO_E_VIRGULA parametro
+          | parametro
+;
+
+parametro : passagem parametro_tipo DOIS_PONTOS tipo
+            {
+              tipo_tabela(tab_simb, token, var_count);
+            }
+;
+
+passagem: VAR 
+          {
+            passagem_tipo = REFERENCIA;
+          }
+        |
+          {
+            passagem_tipo = VALOR;
+          }
+;
+
+parametro_tipo: parametro_tipo VIRGULA IDENT
+                {
+                  printf("##########################\n\n");
+                  if(busca_tabela(tab_simb, token, nivel, NIVEL_SEARCH) != NULL) {
+                    IMPRIME("______Simbolo ja existe");
+                    exit(1);
+                  }
+                  simb_t *simb = cria_simb(token, PARAM_FORM, nivel, deslocamento[nivel]);
+                  insere_tabela(tab_simb, simb);
+
+                  tab_simb->head->passagem_tipo = passagem_tipo;
+                  var_count++;
+                }
+              | IDENT
+                {
+                  printf("##########################\n\n");
+                  if(busca_tabela(tab_simb, token, nivel, NIVEL_SEARCH) != NULL) {
+                    IMPRIME("______Simbolo ja existe");
+                    exit(1);
+                  }
+                  simb_t *simb = cria_simb(token, PARAM_FORM, nivel, deslocamento[nivel]);
+                  insere_tabela(tab_simb, simb);
+
+                  tab_simb->head->passagem_tipo = passagem_tipo;
+                  var_count++;
+                }
+;
+
+parte_declara_vars  : { var_count = 0;} 
+                      VAR declara_vars
                     | 
 ;
 
@@ -160,7 +224,7 @@ declara_var : lista_id_var DOIS_PONTOS tipo
               PONTO_E_VIRGULA
 ;
 
-tipo        : INTEGER
+tipo        : INTEGER{printf("##########################\n\n");}
 ;
 
 lista_id_var  : lista_id_var VIRGULA IDENT 
