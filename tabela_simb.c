@@ -99,8 +99,7 @@ void imprime_tabela(tabela_simb_t *t) {
 
 void ajustaDeslocamentoParams(tabela_simb_t *t, int count) {
     simb_t *aux = t->head;
-
-    for(int i = count-1; i >= 0 && aux != NULL; i++) {
+    for(int i = count-1; i >= 0 && aux != NULL; i--) {
         aux->deslocamento = -4 - i;
         aux = aux->prox;
     }

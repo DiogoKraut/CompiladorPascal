@@ -1,6 +1,6 @@
 program proc2 (input, output); 
 var x, y: integer;      
-   procedure p(t:integer);     
+   procedure p(t,u:integer);     
    var z:integer;           
       begin                    
         if (t>1)               
